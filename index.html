@@ -343,7 +343,7 @@ var OBRA_COLORS={
 function obraColor(o,i){return (OBRA_COLORS[o]||['#888','#666','#aaa'])[i||0];}
 
 var EQ_C={'SETT':[CG,CGh],'ANDERSON':[CA,CAh],'KELSON':[CB,CBh],'ISAEL':[CC,CCh],'SETT 2':[CGo,CGoh],'JULIO':[CLi,CLih],'RONALDO':[CI2,CI2h],'WALLISON':['#e040fb','#ea80fc'],'S/ EQUIPE':['#78909c','#90a4ae'],'OSIEL':['#ff9800','#ffb74d'],'RAIMUNDO':['#26c6da','#4dd0e1'],'RAIMUNDO II':['#ef5350','#ff8a80'],'ANDERSON II':['#ab47bc','#ce93d8']};
-var TI_C={'EXTRUSÃO':[CA,CAh],'FRIO':[CI1,CI1h],'HOT SPRAY':[CC,CCh],'REMOÇÃO':['#78909c','#90a4ae'],'TACHA MONO':[CGo,CGoh],'TACHÃO BI':['#ab47bc','#ce93d8'],'TACHÃO MONO':['#66bb6a','#81c784']};
+var TI_C={'EXTRUSÃO':[CA,CAh],'FRIO':[CI1,CI1h],'FRIO BI':['#26c6da','#4dd0e1'],'FRIO TRI':['#0097a7','#00bcd4'],'HOT SPRAY':[CC,CCh],'REMOÇÃO':['#78909c','#90a4ae'],'TACHA MONO':[CGo,CGoh],'TACHÃO BI':['#ab47bc','#ce93d8'],'TACHÃO MONO':['#66bb6a','#81c784']};
 // Dynamic color assignment for unknown types/equipes
 var _dynColors=['#ff7043','#8d6e63','#78909c','#d4e157','#aed581','#4db6ac','#4dd0e1','#9575cd','#f06292','#ba68c8'];
 var _dynIdx=0;
@@ -353,8 +353,8 @@ function tBg(t){var k=t;for(var x in TI_C){if(t.indexOf(x)>=0){k=x;break;}}retur
 function tHv(t){var k=t;for(var x in TI_C){if(t.indexOf(x)>=0){k=x;break;}}return (TI_C[k]||[eBg(t),eHv(t)])[1];}
 
 // ── MATERIAL RATE CONSTANTS ─────────────────────────────────────────────────
-var MAT_RATE={'EXTRUSÃO':5,'FRIO':0.56,'HOT SPRAY':3};
-var EMB_RATE={'EXTRUSÃO':25,'FRIO':18,'HOT SPRAY':25};
+var MAT_RATE={'EXTRUSÃO':5,'FRIO':0.56,'FRIO BI':1.8,'FRIO TRI':0.56,'HOT SPRAY':3};
+var EMB_RATE={'EXTRUSÃO':25,'FRIO':18,'FRIO BI':18,'FRIO TRI':18,'HOT SPRAY':25};
 var ESFERA_RATE=0.3;
 // NeoVia excluded from material
 var MAT_EXCLUDE_OBRAS=['NEOVIA'];
@@ -385,7 +385,6 @@ var TIPO_MAP={
   'BASE SOLVENTE VRM':'FRIO','FRIO':'FRIO','FRIO 2':'FRIO','FRIO ACRILICO':'FRIO',
   'FRIO MANUAL':'FRIO','FRIO MANUAL T':'FRIO','FRIO MECANICO':'FRIO',
   'FRIO MECANICO T':'FRIO','FRIO T':'FRIO','FRIO MAN':'FRIO','FRIO MEC':'FRIO',
-  'FRIO BI':'FRIO','FRIO TRI':'FRIO','FRIO TRI T':'FRIO','FRIO BI T':'FRIO',
   // EXTRUSÃO
   'EXTRUSÃO':'EXTRUSÃO','EXTRUSÃO BRC':'EXTRUSÃO','EXTRUSÃO T':'EXTRUSÃO',
   'TERM. EXTRUSÃO':'EXTRUSÃO','TERM. EXTRUSÃO T':'EXTRUSÃO',
