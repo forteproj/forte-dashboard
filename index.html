@@ -197,7 +197,7 @@
   <div class="chart-card" style="margin-bottom:40px;">
     <div class="card-header">
       <div><div class="chart-title">Dias Trabalhados</div><div class="chart-desc">dias únicos com execução por mês</div></div>
-      <div style="display:flex;gap:16px;align-items:center;">
+      <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap;max-width:900px;">
         <label style="font-family:'IBM Plex Mono',monospace;font-size:11px;color:#F5C400;cursor:pointer;display:flex;align-items:center;gap:5px;">
           <input type="checkbox" id="chkTodas" checked onchange="toggleTodas()" style="accent-color:#F5C400;cursor:pointer;">
           Todas
@@ -385,6 +385,7 @@ var TIPO_MAP={
   'BASE SOLVENTE VRM':'FRIO','FRIO':'FRIO','FRIO 2':'FRIO','FRIO ACRILICO':'FRIO',
   'FRIO MANUAL':'FRIO','FRIO MANUAL T':'FRIO','FRIO MECANICO':'FRIO',
   'FRIO MECANICO T':'FRIO','FRIO T':'FRIO','FRIO MAN':'FRIO','FRIO MEC':'FRIO',
+  'FRIO BI':'FRIO','FRIO TRI':'FRIO','FRIO TRI T':'FRIO','FRIO BI T':'FRIO',
   // EXTRUSÃO
   'EXTRUSÃO':'EXTRUSÃO','EXTRUSÃO BRC':'EXTRUSÃO','EXTRUSÃO T':'EXTRUSÃO',
   'TERM. EXTRUSÃO':'EXTRUSÃO','TERM. EXTRUSÃO T':'EXTRUSÃO',
@@ -695,7 +696,7 @@ function buildMonthButtons(){
 }
 
 function buildDiasCheckboxes(){
-  var container=document.querySelector('.card-header div[style*="flex"][style*="gap:16px"]');
+  var container=document.querySelector('.card-header div[style*="flex"][style*="gap:10px"]');
   if(!container)return;
   container.innerHTML='';
   // "Todas" checkbox
@@ -728,9 +729,11 @@ var multiBarEndPlugin={id:'multiBarEnd',afterDatasetsDraw:function(chart){var ct
 
 var equipeChart=new Chart(document.getElementById('chartEquipe'),{type:'bar',data:{labels:[],datasets:[{label:'Faturamento',data:[],backgroundColor:[],borderColor:[],hoverBackgroundColor:[],borderWidth:2,borderRadius:0},{label:'Custo',data:[],backgroundColor:[],borderColor:[],hoverBackgroundColor:[],borderWidth:2,borderRadius:0}]},plugins:[multiBarEndPlugin],options:{indexAxis:'y',responsive:true,maintainAspectRatio:false,layout:{padding:{right:70}},animation:{duration:500,easing:'easeInOutQuart'},plugins:{legend:{labels:{color:'#aaa',boxWidth:12,font:{size:10}}},tooltip:{callbacks:{label:function(c){return ' '+c.dataset.label+': '+fmt(c.parsed.x);}}}},scales:{x:{grid:{display:false},ticks:{color:'#aaa',callback:function(v){return 'R$ '+(v/1000).toFixed(0)+'k';}}},y:{grid:{display:false},ticks:{color:'#ddd',font:{family:"'Bebas Neue'",size:15}}}}}});
 
-var resChart=new Chart(document.getElementById('chartResultadoTipo'),{type:'bar',data:{labels:[],datasets:[{label:'Resultado',data:[],backgroundColor:[],borderColor:[],hoverBackgroundColor:[],borderWidth:2,borderRadius:0}]},options:{responsive:true,maintainAspectRatio:false,animation:{duration:500,easing:'easeInOutQuart'},plugins:{legend:{display:false},tooltip:{callbacks:{label:function(c){return ' '+fmt(c.parsed.y);}}}},scales:scaleXBebasY}});
+var barTopLabelPlugin={id:'barTopLabel',afterDatasetsDraw:function(chart){var meta=chart.getDatasetMeta(0);if(!meta||!meta.data)return;var ctx=chart.ctx;ctx.save();ctx.font="600 10px 'IBM Plex Mono',monospace";ctx.fillStyle='#f0f0f0';ctx.textAlign='center';ctx.textBaseline='bottom';var suffix=chart.config.options._labelSuffix||'';var isMoney=chart.config.options._labelMoney||false;meta.data.forEach(function(bar,i){var val=chart.data.datasets[0].data[i];if(val>0){var label=isMoney?fmt(val):(val.toLocaleString('pt-BR',{minimumFractionDigits:0,maximumFractionDigits:0})+suffix);ctx.fillText(label,bar.x,bar.y-6);}});ctx.restore();}};
 
-var m2Chart=new Chart(document.getElementById('chartM2Tipo'),{type:'bar',data:{labels:[],datasets:[{label:'m²',data:[],backgroundColor:[],borderColor:[],hoverBackgroundColor:[],borderWidth:2,borderRadius:0}]},options:{responsive:true,maintainAspectRatio:false,animation:{duration:500,easing:'easeInOutQuart'},plugins:{legend:{display:false},tooltip:{callbacks:{label:function(c){return ' '+c.parsed.y.toLocaleString('pt-BR')+' m²';}}}},scales:{x:{grid:{display:false},ticks:{color:'#ccc',font:{family:"'Bebas Neue'",size:13}}},y:{grid:{display:false},ticks:{color:'#aaa'}}}}});
+var resChart=new Chart(document.getElementById('chartResultadoTipo'),{type:'bar',data:{labels:[],datasets:[{label:'Resultado',data:[],backgroundColor:[],borderColor:[],hoverBackgroundColor:[],borderWidth:2,borderRadius:0}]},plugins:[barTopLabelPlugin],options:{responsive:true,maintainAspectRatio:false,layout:{padding:{top:28}},animation:{duration:500,easing:'easeInOutQuart'},_labelMoney:true,plugins:{legend:{display:false},tooltip:{callbacks:{label:function(c){return ' '+fmt(c.parsed.y);}}}},scales:scaleXBebasY}});
+
+var m2Chart=new Chart(document.getElementById('chartM2Tipo'),{type:'bar',data:{labels:[],datasets:[{label:'m²',data:[],backgroundColor:[],borderColor:[],hoverBackgroundColor:[],borderWidth:2,borderRadius:0}]},plugins:[barTopLabelPlugin],options:{responsive:true,maintainAspectRatio:false,layout:{padding:{top:28}},animation:{duration:500,easing:'easeInOutQuart'},_labelSuffix:' m²',plugins:{legend:{display:false},tooltip:{callbacks:{label:function(c){return ' '+c.parsed.y.toLocaleString('pt-BR')+' m²';}}}},scales:{x:{grid:{display:false},ticks:{color:'#ccc',font:{family:"'Bebas Neue'",size:13}}},y:{grid:{display:false},ticks:{color:'#aaa'}}}}});
 
 var endLabelPlugin={id:'endLabel',afterDraw:function(chart){chart.data.datasets.forEach(function(ds,i){if(ds.type!=='line'||!ds._showEndLabel)return;var meta=chart.getDatasetMeta(i);var pts=meta.data;if(!pts||pts.length===0)return;var last=pts[pts.length-1];var ctx=chart.ctx;ctx.save();ctx.font="600 11px 'IBM Plex Mono',monospace";ctx.fillStyle='#F5C400';ctx.textAlign='left';ctx.textBaseline='middle';ctx.fillText(ds._endLabel,last.x+8,last.y);ctx.restore();});}};
 
@@ -739,8 +742,6 @@ function makeMediaLine(val,labels){return{type:'line',label:'Média '+val+'%',da
 var mediaLineFullPlugin={id:'mediaLineFull',afterDraw:function(chart){chart.data.datasets.forEach(function(ds,i){if(!ds._isMediaLine)return;var meta=chart.getDatasetMeta(i);if(meta.hidden)return;var yScale=chart.scales.y;var xScale=chart.scales.x;var yPos=yScale.getPixelForValue(ds.data[0]);var ctx=chart.ctx;ctx.save();ctx.beginPath();ctx.setLineDash([6,4]);ctx.strokeStyle='#F5C400';ctx.lineWidth=2;ctx.moveTo(xScale.left,yPos);ctx.lineTo(xScale.right,yPos);ctx.stroke();ctx.setLineDash([]);if(ds._showEndLabel){ctx.font="600 11px 'IBM Plex Mono',monospace";ctx.fillStyle='#F5C400';ctx.textAlign='left';ctx.textBaseline='middle';ctx.fillText(ds._endLabel,xScale.right+8,yPos);}ctx.restore();});}};
 
 var rentChart=new Chart(document.getElementById('chartRent'),{type:'bar',data:{labels:[],datasets:[]},plugins:[mediaLineFullPlugin],options:{responsive:true,maintainAspectRatio:false,animation:{duration:500,easing:'easeInOutQuart'},layout:{padding:{right:52}},plugins:{legend:{labels:{color:'#aaa',boxWidth:12,font:{size:10}}},tooltip:{callbacks:{label:function(c){return ' '+c.dataset.label+': '+(c.parsed.y!==undefined?c.parsed.y:c.raw)+'%';}}}},scales:{x:{grid:{display:false},ticks:{color:'#aaa'}},y:{grid:{display:false},min:0,max:60,ticks:{color:'#aaa',callback:function(v){return v+'%';}}}}}});
-
-var barTopLabelPlugin={id:'barTopLabel',afterDatasetsDraw:function(chart){var meta=chart.getDatasetMeta(0);if(!meta||!meta.data)return;var ctx=chart.ctx;ctx.save();ctx.font="600 10px 'IBM Plex Mono',monospace";ctx.fillStyle='#f0f0f0';ctx.textAlign='center';ctx.textBaseline='bottom';var suffix=chart.config.options._labelSuffix||'';meta.data.forEach(function(bar,i){var val=chart.data.datasets[0].data[i];if(val>0){var label=val.toLocaleString('pt-BR',{minimumFractionDigits:0,maximumFractionDigits:0})+suffix;ctx.fillText(label,bar.x,bar.y-6);}});ctx.restore();}};
 
 var matKgChart=new Chart(document.getElementById('chartMatKg'),{type:'bar',data:{labels:[],datasets:[{label:'kg/Lt',data:[],backgroundColor:[],borderColor:[],hoverBackgroundColor:[],borderWidth:2,borderRadius:0}]},plugins:[barTopLabelPlugin],options:{responsive:true,maintainAspectRatio:false,layout:{padding:{top:24}},animation:{duration:600,easing:'easeInOutQuart'},_labelSuffix:'',plugins:{legend:{display:false},tooltip:{callbacks:{label:function(c){return ' '+c.parsed.y.toLocaleString('pt-BR',{minimumFractionDigits:2,maximumFractionDigits:2})+' kg/Lt';}}}},scales:scaleXkgY}});
 
@@ -760,15 +761,28 @@ function applyTipoColors(chart,tipos,alpha){chart.data.datasets[0].backgroundCol
 function updateMensal(){var m=DATA[currentObra].mensal;mensalChart.data.labels=m.labels;mensalChart.data.datasets[0].data=m.fat;mensalChart.data.datasets[1].data=m.custo;mensalChart.update();}
 
 function updateRoscaChart(mes){
-  var data=ROSCA_KEYS.map(function(k){return ROSCA_FAT[k]?ROSCA_FAT[k][mes]||0:0;});
-  var labels=[],vals=[],bgs=[],bds=[],hvs=[];
-  ROSCA_KEYS.forEach(function(k,i){if(data[i]>0){labels.push(k);vals.push(data[i]);bgs.push(ROSCA_COLORS[i]);bds.push(ROSCA_BORDERS[i]);hvs.push(ROSCA_HOVER[i]);}});
-  roscaChart.data.labels=labels;roscaChart.data.datasets[0].data=vals;
-  roscaChart.data.datasets[0].backgroundColor=bgs;roscaChart.data.datasets[0].borderColor=bds;roscaChart.data.datasets[0].hoverBackgroundColor=hvs;
+  var items=[];
+  ROSCA_KEYS.forEach(function(k,i){var v=ROSCA_FAT[k]?ROSCA_FAT[k][mes]||0:0;if(v>0){items.push({k:k,v:v,bg:ROSCA_COLORS[i],bd:ROSCA_BORDERS[i],hv:ROSCA_HOVER[i]});}});
+  items.sort(function(a,b){return b.v-a.v;});
+  roscaChart.data.labels=items.map(function(x){return x.k;});
+  roscaChart.data.datasets[0].data=items.map(function(x){return x.v;});
+  roscaChart.data.datasets[0].backgroundColor=items.map(function(x){return x.bg;});
+  roscaChart.data.datasets[0].borderColor=items.map(function(x){return x.bd;});
+  roscaChart.data.datasets[0].hoverBackgroundColor=items.map(function(x){return x.hv;});
   roscaChart.update();
 }
 
-function updateTipoChart(mes){var allTipos=DATA[currentObra].tipoFatLabels||DATA[currentObra].tipos;var tipos=[],vals=[];allTipos.forEach(function(t){var v=(DATA[currentObra].tipoFat[mes]||{})[t]||0;if(v>0){tipos.push(t);vals.push(v);}});tipoChart.data.labels=tipos;tipoChart.data.datasets[0].data=vals;tipoChart.data.datasets[0].backgroundColor=tipos.map(function(t){return tBg(t)+'cc';});tipoChart.data.datasets[0].borderColor=tipos.map(function(t){return tBg(t);});tipoChart.data.datasets[0].hoverBackgroundColor=tipos.map(function(t){return tHv(t);});tipoChart.update();document.getElementById('selTipoMes').value=mes;}
+function updateTipoChart(mes){
+  var allTipos=DATA[currentObra].tipoFatLabels||DATA[currentObra].tipos;
+  var items=[];allTipos.forEach(function(t){var v=(DATA[currentObra].tipoFat[mes]||{})[t]||0;if(v>0){items.push({t:t,v:v});}});
+  items.sort(function(a,b){return b.v-a.v;});
+  var tipos=items.map(function(x){return x.t;});var vals=items.map(function(x){return x.v;});
+  tipoChart.data.labels=tipos;tipoChart.data.datasets[0].data=vals;
+  tipoChart.data.datasets[0].backgroundColor=tipos.map(function(t){return tBg(t)+'cc';});
+  tipoChart.data.datasets[0].borderColor=tipos.map(function(t){return tBg(t);});
+  tipoChart.data.datasets[0].hoverBackgroundColor=tipos.map(function(t){return tHv(t);});
+  tipoChart.update();document.getElementById('selTipoMes').value=mes;
+}
 
 function updateEquipeChart(mes){var eqs=DATA[currentObra].equipes;var edata=DATA[currentObra].equipeData[mes]||{};equipeChart.data.labels=eqs;equipeChart.data.datasets[0].data=eqs.map(function(e){return(edata[e]||{fat:0}).fat;});equipeChart.data.datasets[0].backgroundColor=eqs.map(function(){return CG+'bb';});equipeChart.data.datasets[0].borderColor=eqs.map(function(){return CG;});equipeChart.data.datasets[0].hoverBackgroundColor=eqs.map(function(){return CGh;});equipeChart.data.datasets[1].data=eqs.map(function(e){return(edata[e]||{custo:0}).custo;});equipeChart.data.datasets[1].backgroundColor=eqs.map(function(){return CR+'99';});equipeChart.data.datasets[1].borderColor=eqs.map(function(){return CR;});equipeChart.data.datasets[1].hoverBackgroundColor=eqs.map(function(){return CRh;});equipeChart.update();document.getElementById('selEquipeMes').value=mes;}
 
@@ -888,7 +902,7 @@ function drawGauge(canvasId,current,reference,label,isMoney){var canvas=document
 
 function getGaugeRef(selId,dataObj,obra){var ref=document.getElementById(selId).value;if(ref==='AVG')return dataObj[obra]?dataObj[obra].ALL||0:0;return dataObj[obra]?dataObj[obra][ref]||0:0;}
 
-function updateGauges(){var mes=currentMes;var obra=currentObra;var atualDU=getGaugeRef('selGauge1Ref',FAT_DIA_UTIL,obra);var refDU=(FAT_DIA_UTIL[obra]||{})[mes]||0;drawGauge('gauge1',atualDU,refDU,'',true);var GAUGE_FAT={};var allObras=['TODAS'].concat(ROSCA_KEYS);allObras.forEach(function(o){GAUGE_FAT[o]={};['ALL'].concat(MONTHS).forEach(function(m){GAUGE_FAT[o][m]=DATA[o]&&DATA[o].kpi[m]?DATA[o].kpi[m].fat:0;});});var atualFat=getGaugeRef('selGauge2Ref',GAUGE_FAT,obra);var refFat=(GAUGE_FAT[obra]||{})[mes]||0;drawGauge('gauge2',atualFat,refFat,'',true);}
+function updateGauges(){var mes=currentMes;var obra=currentObra;var refDU=getGaugeRef('selGauge1Ref',FAT_DIA_UTIL,obra);var atualDU=(FAT_DIA_UTIL[obra]||{})[mes]||0;drawGauge('gauge1',atualDU,refDU,'',true);var GAUGE_FAT={};var allObras=['TODAS'].concat(ROSCA_KEYS);allObras.forEach(function(o){GAUGE_FAT[o]={};['ALL'].concat(MONTHS).forEach(function(m){GAUGE_FAT[o][m]=DATA[o]&&DATA[o].kpi[m]?DATA[o].kpi[m].fat:0;});});var refFat=getGaugeRef('selGauge2Ref',GAUGE_FAT,obra);var atualFat=(GAUGE_FAT[obra]||{})[mes]||0;drawGauge('gauge2',atualFat,refFat,'',true);}
 
 // ── FETCH & RENDER ──────────────────────────────────────────────────────────
 function fetchAndRender(){
