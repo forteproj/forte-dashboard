@@ -205,7 +205,7 @@
   <div class="chart-card" style="margin-bottom:40px;">
     <div class="card-header">
       <div><div class="chart-title">Dias Trabalhados</div><div class="chart-desc">dias únicos com execução por mês</div></div>
-      <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap;max-width:900px;">
+      <div id="diasCheckboxes" style="display:flex;gap:10px;align-items:center;flex-wrap:wrap;max-width:900px;">
         <label style="font-family:'IBM Plex Mono',monospace;font-size:11px;color:#F5C400;cursor:pointer;display:flex;align-items:center;gap:5px;">
           <input type="checkbox" id="chkTodas" checked onchange="toggleTodas()" style="accent-color:#F5C400;cursor:pointer;">
           Todas
@@ -701,7 +701,7 @@ function buildMonthButtons(){
 }
 
 function buildDiasCheckboxes(){
-  var container=document.querySelector('.card-header div[style*="flex"][style*="gap:10px"]');
+  var container=document.getElementById('diasCheckboxes');
   if(!container)return;
   container.innerHTML='';
   // "Todas" checkbox
