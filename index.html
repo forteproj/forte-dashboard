@@ -157,7 +157,7 @@
     <div class="chart-card">
       <div class="chart-title">Representatividade por Obra</div>
       <div class="chart-desc">participação no faturamento total</div>
-      <div style="height:300px;display:flex;align-items:center;justify-content:center;"><canvas id="chartRosca"></canvas></div>
+      <div style="height:380px;display:flex;align-items:center;justify-content:center;"><canvas id="chartRosca"></canvas></div>
     </div>
     <div class="chart-card">
       <div class="card-header">
@@ -245,25 +245,23 @@
 
   <!-- ROW 3 -->
   <div class="section-label">Margem e Área por Tipo de Execução</div>
-  <div class="charts-grid-2">
-    <div class="chart-card">
-      <div class="card-header">
-        <div><div class="chart-title">Resultado por Tipo</div><div class="chart-desc">lucro líquido por método</div></div>
-        <select class="sel-style" id="selResMes" onchange="updateResChart(this.value)">
-          <option value="ALL">TODOS OS MESES</option><option value="JAN">JANEIRO</option><option value="FEV">FEVEREIRO</option><option value="MAR">MARÇO</option>
-        </select>
-      </div>
-      <div style="height:220px"><canvas id="chartResultadoTipo"></canvas></div>
+  <div class="chart-card" style="margin-bottom:16px;">
+    <div class="card-header">
+      <div><div class="chart-title">Resultado por Tipo</div><div class="chart-desc">lucro líquido por método</div></div>
+      <select class="sel-style" id="selResMes" onchange="updateResChart(this.value)">
+        <option value="ALL">TODOS OS MESES</option><option value="JAN">JANEIRO</option><option value="FEV">FEVEREIRO</option><option value="MAR">MARÇO</option>
+      </select>
     </div>
-    <div class="chart-card">
-      <div class="card-header">
-        <div><div class="chart-title">Área Executada (m²)</div><div class="chart-desc">metragem por tipo</div></div>
-        <select class="sel-style" id="selM2Mes" onchange="updateM2Chart(this.value)">
-          <option value="ALL">TODOS OS MESES</option><option value="JAN">JANEIRO</option><option value="FEV">FEVEREIRO</option><option value="MAR">MARÇO</option>
-        </select>
-      </div>
-      <div style="height:220px"><canvas id="chartM2Tipo"></canvas></div>
+    <div style="height:220px"><canvas id="chartResultadoTipo"></canvas></div>
+  </div>
+  <div class="chart-card" style="margin-bottom:40px;">
+    <div class="card-header">
+      <div><div class="chart-title">Área Executada (m²)</div><div class="chart-desc">metragem por tipo</div></div>
+      <select class="sel-style" id="selM2Mes" onchange="updateM2Chart(this.value)">
+        <option value="ALL">TODOS OS MESES</option><option value="JAN">JANEIRO</option><option value="FEV">FEVEREIRO</option><option value="MAR">MARÇO</option>
+      </select>
     </div>
+    <div style="height:220px"><canvas id="chartM2Tipo"></canvas></div>
   </div>
 
   <!-- MATERIAL -->
@@ -720,7 +718,7 @@ var multiBarTopPlugin={id:'multiBarTop',afterDatasetsDraw:function(chart){var ct
 
 var mensalChart=new Chart(document.getElementById('chartMensal'),{type:'bar',data:{labels:[],datasets:[{label:'Faturamento',data:[],backgroundColor:CG+'bb',borderColor:CG,hoverBackgroundColor:CGh,borderWidth:2,borderRadius:0},{label:'Custo',data:[],backgroundColor:CR+'99',borderColor:CR,hoverBackgroundColor:CRh,borderWidth:2,borderRadius:0}]},plugins:[multiBarTopPlugin],options:{responsive:true,maintainAspectRatio:false,layout:{padding:{top:36}},animation:{duration:600,easing:'easeInOutQuart'},plugins:{legend:{position:'top',align:'center',labels:{color:'#aaa',boxWidth:12,font:{size:13,family:"'Bebas Neue'"},padding:20}},tooltip:{callbacks:{label:function(c){return ' '+c.dataset.label+': '+fmt(c.parsed.y);}}}},scales:{x:{grid:{display:false},ticks:{color:'#aaa'}},y:{grace:'15%',grid:{display:false},ticks:{color:'#aaa',callback:function(v){return v>=1000000?'R$ '+(v/1000000).toFixed(0)+'M':'R$ '+(v/1000).toFixed(0)+'k';}}}}}});
 
-var roscaChart=new Chart(document.getElementById('chartRosca'),{type:'doughnut',data:{labels:[],datasets:[{data:[],backgroundColor:[],borderColor:[],hoverBackgroundColor:[],borderWidth:2}]},options:{responsive:true,maintainAspectRatio:false,cutout:'55%',animation:{duration:600,easing:'easeInOutQuart'},plugins:{legend:{position:'right',labels:{color:'#f0f0f0',font:{family:"'IBM Plex Mono'",size:11},padding:14,boxWidth:14,generateLabels:function(chart){var ds=chart.data.datasets[0];var total=ds.data.reduce(function(a,b){return a+b;},0);return chart.data.labels.map(function(l,i){var v=ds.data[i];var pct=total>0?(v/total*100).toFixed(1):"0.0";return{text:l+' · '+pct+'%',fillStyle:ds.backgroundColor[i],strokeStyle:ds.borderColor[i],fontColor:'#f0f0f0',lineWidth:2,hidden:false,index:i};});}}},tooltip:{callbacks:{label:function(c){var total=c.dataset.data.reduce(function(a,b){return a+b;},0);var pct=total>0?(c.raw/total*100).toFixed(1):"0.0";return ' '+c.label+': '+fmt(c.raw)+' ('+pct+'%)';}}}}}});
+var roscaChart=new Chart(document.getElementById('chartRosca'),{type:'doughnut',data:{labels:[],datasets:[{data:[],backgroundColor:[],borderColor:[],hoverBackgroundColor:[],borderWidth:2}]},options:{responsive:true,maintainAspectRatio:false,cutout:'55%',animation:{duration:600,easing:'easeInOutQuart'},plugins:{legend:{position:'right',align:'start',labels:{color:'#f0f0f0',font:{family:"'IBM Plex Mono'",size:11},padding:10,boxWidth:12,generateLabels:function(chart){var ds=chart.data.datasets[0];var total=ds.data.reduce(function(a,b){return a+b;},0);var items=chart.data.labels.map(function(l,i){var v=ds.data[i];var pct=total>0?(v/total*100).toFixed(1):"0.0";return{text:l+' · '+pct+'%',fillStyle:ds.backgroundColor[i],strokeStyle:ds.borderColor[i],fontColor:'#f0f0f0',lineWidth:2,hidden:false,index:i};});return items;}}},tooltip:{callbacks:{label:function(c){var total=c.dataset.data.reduce(function(a,b){return a+b;},0);var pct=total>0?(c.raw/total*100).toFixed(1):"0.0";return ' '+c.label+': '+fmt(c.raw)+' ('+pct+'%)';}}}}}});
 
 var tipoChart=new Chart(document.getElementById('chartTipo'),{type:'doughnut',data:{labels:[],datasets:[{data:[],backgroundColor:[],borderColor:[],hoverBackgroundColor:[],borderWidth:2}]},options:{responsive:true,maintainAspectRatio:false,cutout:'50%',animation:{duration:500,easing:'easeInOutQuart'},plugins:{legend:{position:'right',labels:{color:'#f0f0f0',font:{family:"'IBM Plex Mono'",size:10},padding:10,boxWidth:12,generateLabels:function(chart){var ds=chart.data.datasets[0];var total=ds.data.reduce(function(a,b){return a+b;},0);return chart.data.labels.map(function(l,i){var v=ds.data[i];var pct=total>0?(v/total*100).toFixed(1):"0.0";return{text:l+' · '+pct+'%',fillStyle:ds.backgroundColor[i],strokeStyle:ds.borderColor[i],fontColor:'#f0f0f0',lineWidth:2,hidden:false,index:i};});}}},tooltip:{callbacks:{label:function(c){var total=c.dataset.data.reduce(function(a,b){return a+b;},0);var pct=total>0?(c.raw/total*100).toFixed(1):"0.0";return ' '+c.label+': '+fmt(c.raw)+' ('+pct+'%)';}}}}}});
 
