@@ -147,9 +147,17 @@
   <div class="chart-card" style="margin-bottom:16px;">
     <div class="card-header">
       <div><div class="chart-title">Rentabilidade por Obra</div><div class="chart-desc">margem % média por período</div></div>
-      <select class="sel-style" id="selRentMes" onchange="updateRentChart(this.value)">
-        <option value="ALL">TODOS OS MESES</option><option value="JAN">JANEIRO</option><option value="FEV">FEVEREIRO</option><option value="MAR">MARÇO</option>
-      </select>
+      <div style="display:flex;flex-direction:column;align-items:flex-end;gap:8px;">
+        <select class="sel-style" id="selRentMes" onchange="updateRentChart(this.value)">
+          <option value="ALL">TODOS OS MESES</option><option value="JAN">JANEIRO</option><option value="FEV">FEVEREIRO</option><option value="MAR">MARÇO</option>
+        </select>
+        <div id="rentCheckboxes" style="display:flex;gap:10px;align-items:center;flex-wrap:wrap;justify-content:flex-end;max-width:900px;">
+          <label style="font-family:'IBM Plex Mono',monospace;font-size:11px;color:#F5C400;cursor:pointer;display:flex;align-items:center;gap:5px;">
+            <input type="checkbox" id="chkRentTodas" checked onchange="toggleRentTodas()" style="accent-color:#F5C400;cursor:pointer;">Todas
+          </label>
+          <span style="width:1px;height:16px;background:#606060;"></span>
+        </div>
+      </div>
     </div>
     <div style="height:300px"><canvas id="chartRent"></canvas></div>
   </div>
@@ -800,15 +808,45 @@ function updateRentKpi(mes,obra){
   document.getElementById('rentKpiDesc').innerHTML=desc;
 }
 
+function buildRentCheckboxes(){
+  var container=document.getElementById('rentCheckboxes');
+  // Remove obra checkboxes antigos, mantém "Todas" e separador
+  while(container.children.length>2)container.removeChild(container.lastChild);
+  ROSCA_KEYS.forEach(function(o){
+    var l=document.createElement('label');
+    l.style='font-family:IBM Plex Mono,monospace;font-size:11px;color:#ccc;cursor:pointer;display:flex;align-items:center;gap:5px;';
+    l.innerHTML='<input type="checkbox" id="chkRent_'+o.replace(/\s/g,'_')+'" checked onchange="updateRentFromCheck()" style="accent-color:'+obraColor(o)+';cursor:pointer;"><span class="obra-dot" style="background:'+obraColor(o)+'"></span>'+o;
+    container.appendChild(l);
+  });
+}
+
+function toggleRentTodas(){
+  var all=document.getElementById('chkRentTodas').checked;
+  ROSCA_KEYS.forEach(function(o){var el=document.getElementById('chkRent_'+o.replace(/\s/g,'_'));if(el)el.checked=all;});
+  updateRentChart(document.getElementById('selRentMes').value);
+}
+
+function updateRentFromCheck(){
+  var allChecked=true;
+  ROSCA_KEYS.forEach(function(o){var el=document.getElementById('chkRent_'+o.replace(/\s/g,'_'));if(el&&!el.checked)allChecked=false;});
+  document.getElementById('chkRentTodas').checked=allChecked;
+  updateRentChart(document.getElementById('selRentMes').value);
+}
+
+function getCheckedRentObras(){
+  return ROSCA_KEYS.filter(function(o){var el=document.getElementById('chkRent_'+o.replace(/\s/g,'_'));return el&&el.checked;});
+}
+
 function updateRentChart(mes){
   var labels,datasets,mediaVal;
+  var checkedObras=getCheckedRentObras();
   if(currentObra==='TODAS'){
     if(mes==='ALL'){
       labels=MONTHS.slice();mediaVal=RENT_MEDIA.ALL;
-      datasets=ROSCA_KEYS.map(function(o){return{type:'bar',label:o,data:MONTHS.map(function(m){return RENT[o]?RENT[o][m]||0:0;}),backgroundColor:obraColor(o)+'bb',borderColor:obraColor(o),hoverBackgroundColor:obraColor(o,2),borderWidth:2,borderRadius:0,order:1};});
+      datasets=checkedObras.map(function(o){return{type:'bar',label:o,data:MONTHS.map(function(m){return RENT[o]?RENT[o][m]||0:0;}),backgroundColor:obraColor(o)+'bb',borderColor:obraColor(o),hoverBackgroundColor:obraColor(o,2),borderWidth:2,borderRadius:0,order:1};});
       datasets.push(makeMediaLine(mediaVal,labels));
     } else {
-      labels=ROSCA_KEYS.slice();mediaVal=RENT_MEDIA[mes]||0;
+      labels=checkedObras.slice();mediaVal=RENT_MEDIA[mes]||0;
       datasets=[{type:'bar',label:'Margem %',data:labels.map(function(o){return RENT[o]?RENT[o][mes]||0:0;}),backgroundColor:labels.map(function(o){return obraColor(o)+'bb';}),borderColor:labels.map(function(o){return obraColor(o);}),hoverBackgroundColor:labels.map(function(o){return obraColor(o,2);}),borderWidth:2,borderRadius:0,order:1},makeMediaLine(mediaVal,labels)];
     }
   } else {
@@ -923,6 +961,7 @@ function fetchAndRender(){
       buildObraButtons();
       buildMonthButtons();
       buildDiasCheckboxes();
+      buildRentCheckboxes();
       document.getElementById('loadingOverlay').style.display='none';
       setObra('TODAS');
     })
