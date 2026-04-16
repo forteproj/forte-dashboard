@@ -168,12 +168,8 @@
       <div style="height:380px;display:flex;align-items:center;justify-content:center;"><canvas id="chartRosca"></canvas></div>
     </div>
     <div class="chart-card">
-      <div class="card-header">
-        <div><div class="chart-title">Faturamento por Tipo</div><div class="chart-desc">distribuição de receita por método</div></div>
-        <select class="sel-style" id="selTipoMes" onchange="updateTipoChart(this.value)">
-          <option value="ALL">TODOS OS MESES</option><option value="JAN">JANEIRO</option><option value="FEV">FEVEREIRO</option><option value="MAR">MARÇO</option>
-        </select>
-      </div>
+      <div class="chart-title">Faturamento por Tipo</div>
+      <div class="chart-desc">distribuição de receita por método</div>
       <div style="height:380px;display:flex;align-items:center;justify-content:center;"><canvas id="chartTipo"></canvas></div>
     </div>
   </div>
@@ -728,7 +724,7 @@ var mensalChart=new Chart(document.getElementById('chartMensal'),{type:'bar',dat
 
 var roscaChart=new Chart(document.getElementById('chartRosca'),{type:'doughnut',data:{labels:[],datasets:[{data:[],backgroundColor:[],borderColor:[],hoverBackgroundColor:[],borderWidth:2}]},options:{responsive:true,maintainAspectRatio:false,cutout:'55%',animation:{duration:600,easing:'easeInOutQuart'},plugins:{legend:{position:'right',align:'start',labels:{color:'#f0f0f0',font:{family:"'IBM Plex Mono'",size:11},padding:10,boxWidth:12,generateLabels:function(chart){var ds=chart.data.datasets[0];var total=ds.data.reduce(function(a,b){return a+b;},0);var items=chart.data.labels.map(function(l,i){var v=ds.data[i];var pct=total>0?(v/total*100).toFixed(1):"0.0";return{text:l+' · '+pct+'%',fillStyle:ds.backgroundColor[i],strokeStyle:ds.borderColor[i],fontColor:'#f0f0f0',lineWidth:2,hidden:false,index:i};});return items;}}},tooltip:{callbacks:{label:function(c){var total=c.dataset.data.reduce(function(a,b){return a+b;},0);var pct=total>0?(c.raw/total*100).toFixed(1):"0.0";return ' '+c.label+': '+fmt(c.raw)+' ('+pct+'%)';}}}}}});
 
-var tipoChart=new Chart(document.getElementById('chartTipo'),{type:'doughnut',data:{labels:[],datasets:[{data:[],backgroundColor:[],borderColor:[],hoverBackgroundColor:[],borderWidth:2}]},options:{responsive:true,maintainAspectRatio:false,cutout:'50%',animation:{duration:500,easing:'easeInOutQuart'},plugins:{legend:{position:'right',labels:{color:'#f0f0f0',font:{family:"'IBM Plex Mono'",size:10},padding:10,boxWidth:12,generateLabels:function(chart){var ds=chart.data.datasets[0];var total=ds.data.reduce(function(a,b){return a+b;},0);return chart.data.labels.map(function(l,i){var v=ds.data[i];var pct=total>0?(v/total*100).toFixed(1):"0.0";return{text:l+' · '+pct+'%',fillStyle:ds.backgroundColor[i],strokeStyle:ds.borderColor[i],fontColor:'#f0f0f0',lineWidth:2,hidden:false,index:i};});}}},tooltip:{callbacks:{label:function(c){var total=c.dataset.data.reduce(function(a,b){return a+b;},0);var pct=total>0?(c.raw/total*100).toFixed(1):"0.0";return ' '+c.label+': '+fmt(c.raw)+' ('+pct+'%)';}}}}}});
+var tipoChart=new Chart(document.getElementById('chartTipo'),{type:'doughnut',data:{labels:[],datasets:[{data:[],backgroundColor:[],borderColor:[],hoverBackgroundColor:[],borderWidth:2}]},options:{responsive:true,maintainAspectRatio:false,cutout:'50%',animation:{duration:500,easing:'easeInOutQuart'},plugins:{legend:{position:'right',align:'start',labels:{color:'#f0f0f0',font:{family:"'IBM Plex Mono'",size:11},padding:10,boxWidth:12,generateLabels:function(chart){var ds=chart.data.datasets[0];var total=ds.data.reduce(function(a,b){return a+b;},0);return chart.data.labels.map(function(l,i){var v=ds.data[i];var pct=total>0?(v/total*100).toFixed(1):"0.0";return{text:l+' · '+pct+'%',fillStyle:ds.backgroundColor[i],strokeStyle:ds.borderColor[i],fontColor:'#f0f0f0',lineWidth:2,hidden:false,index:i};});}}},tooltip:{callbacks:{label:function(c){var total=c.dataset.data.reduce(function(a,b){return a+b;},0);var pct=total>0?(c.raw/total*100).toFixed(1):"0.0";return ' '+c.label+': '+fmt(c.raw)+' ('+pct+'%)';}}}}}});
 
 var multiBarEndPlugin={id:'multiBarEnd',afterDatasetsDraw:function(chart){var ctx=chart.ctx;ctx.save();ctx.font="600 10px 'IBM Plex Mono',monospace";ctx.textAlign='left';ctx.textBaseline='middle';chart.data.datasets.forEach(function(ds,di){var meta=chart.getDatasetMeta(di);if(!meta||!meta.data)return;ctx.fillStyle=di===0?CG:'#f55c5c';meta.data.forEach(function(bar,i){var val=ds.data[i];if(val>0){var label='R$ '+(val/1000).toFixed(0)+'k';ctx.fillText(label,bar.x+6,bar.y);}});});ctx.restore();}};
 
