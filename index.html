@@ -647,12 +647,21 @@ function processRawData(rows){
       FAT_DIA_UTIL[o][m]=parseFloat((fat/du).toFixed(2));
     });
   });
-  // ULTIMA_EXEC: último registro por equipe (independente de filtros)
+  // ULTIMA_EXEC: última data por equipe + soma por tipo naquele dia
   ULTIMA_EXEC={};
+  // Passo 1: encontrar a data mais recente de cada equipe
   parsed.forEach(function(r){
     if(!ULTIMA_EXEC[r.equipe]||r.dt>ULTIMA_EXEC[r.equipe].dt){
-      ULTIMA_EXEC[r.equipe]={dt:r.dt,obra:r.obra,tipo:r.tipo,m2:r.m2,qty:r.qty};
+      ULTIMA_EXEC[r.equipe]={dt:r.dt,dateKey:r.dateKey,porTipo:{}};
     }
+  });
+  // Passo 2: somar m2/qty por tipo apenas na última data
+  parsed.forEach(function(r){
+    var ue=ULTIMA_EXEC[r.equipe];
+    if(!ue||r.dateKey!==ue.dateKey)return;
+    if(!ue.porTipo[r.tipo])ue.porTipo[r.tipo]={m2:0,qty:0};
+    ue.porTipo[r.tipo].m2+=r.m2;
+    ue.porTipo[r.tipo].qty+=r.qty;
   });
 }
 
@@ -931,15 +940,20 @@ function updateUltimaExec(){
   equipes.forEach(function(eq){
     var r=ULTIMA_EXEC[eq];
     var dataFmt=r.dt.toLocaleDateString('pt-BR',{day:'2-digit',month:'2-digit',year:'numeric'});
-    var val=r.m2>0?r.m2.toLocaleString('pt-BR',{minimumFractionDigits:2,maximumFractionDigits:2})+' m²':(r.qty>0?r.qty.toLocaleString('pt-BR'):'—');
     var cor=eBg(eq);
-    html+='<tr>';
-    html+='<td><span class="money" style="color:#aaa">'+dataFmt+'</span></td>';
-    html+='<td><div class="equipe-name" style="color:'+cor+'">'+eq+'</div></td>';
-    html+='<td><span style="font-family:IBM Plex Mono,monospace;font-size:12px;color:#b0b0b0;">'+r.obra+'</span></td>';
-    html+='<td><span style="font-family:IBM Plex Mono,monospace;font-size:12px;color:#f0f0f0;">'+r.tipo+'</span></td>';
-    html+='<td><span class="money" style="color:#F5C400">'+val+'</span></td>';
-    html+='</tr>';
+    var tipos=Object.keys(r.porTipo).sort();
+    tipos.forEach(function(tipo,idx){
+      var val=r.porTipo[tipo];
+      var valFmt=val.m2>0?val.m2.toLocaleString('pt-BR',{minimumFractionDigits:2,maximumFractionDigits:2})+' m²':(val.qty>0?val.qty.toLocaleString('pt-BR'):'—');
+      html+='<tr>';
+      if(idx===0){
+        html+='<td rowspan="'+tipos.length+'" style="vertical-align:top;padding-top:14px;"><span class="money" style="color:#aaa">'+dataFmt+'</span></td>';
+        html+='<td rowspan="'+tipos.length+'" style="vertical-align:top;padding-top:14px;"><div class="equipe-name" style="color:'+cor+'">'+eq+'</div></td>';
+      }
+      html+='<td><span style="font-family:IBM Plex Mono,monospace;font-size:12px;color:#f0f0f0;">'+tipo+'</span></td>';
+      html+='<td><span class="money" style="color:#F5C400">'+valFmt+'</span></td>';
+      html+='</tr>';
+    });
   });
   tbody.innerHTML=html;
 }
