@@ -935,7 +935,7 @@ function updateMaterial(){
 
 function updateUltimaExec(){
   var tbody=document.getElementById('ultimaExecBody');if(!tbody)return;
-  var equipes=Object.keys(ULTIMA_EXEC).sort();
+  var equipes=Object.keys(ULTIMA_EXEC).sort(function(a,b){return ULTIMA_EXEC[b].dt-ULTIMA_EXEC[a].dt;});
   var html='';
   equipes.forEach(function(eq){
     var r=ULTIMA_EXEC[eq];
