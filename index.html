@@ -302,21 +302,31 @@
     </div>
   </div>
 
-  <div class="charts-grid">
-    <div class="chart-card">
-      <div class="card-header">
-        <div><div class="chart-title">Baldes / Sacos Utilizados</div><div class="chart-desc">embalagens por tipo</div></div>
-        <select class="sel-style" id="selBaldesMes" onchange="updateBaldesChart(this.value)">
-          <option value="ALL">TODOS OS MESES</option><option value="JAN">JANEIRO</option><option value="FEV">FEVEREIRO</option><option value="MAR">MARÇO</option>
-        </select>
-      </div>
-      <div style="height:240px"><canvas id="chartBaldes"></canvas></div>
+  <div class="chart-card" style="margin-bottom:16px;">
+    <div class="card-header">
+      <div><div class="chart-title">Baldes / Sacos Utilizados</div><div class="chart-desc">embalagens por tipo</div></div>
+      <select class="sel-style" id="selBaldesMes" onchange="updateBaldesChart(this.value)">
+        <option value="ALL">TODOS OS MESES</option><option value="JAN">JANEIRO</option><option value="FEV">FEVEREIRO</option><option value="MAR">MARÇO</option>
+      </select>
     </div>
-    <div class="chart-card" id="estoqueCard">
-      <div class="chart-title">Estoque de Material</div>
-      <div class="chart-desc" id="estoqueDesc">selecione Alvorada para ver estoque</div>
-      <div class="mat-estoque-row" id="estoqueContent"></div>
-    </div>
+    <div style="height:280px"><canvas id="chartBaldes"></canvas></div>
+  </div>
+
+  <!-- ÚLTIMA EXECUÇÃO POR COLABORADOR -->
+  <div class="section-label">Última Execução por Colaborador</div>
+  <div class="chart-card" style="margin-bottom:40px;">
+    <table class="equipe-table" id="ultimaExecTable">
+      <thead>
+        <tr>
+          <th>DATA</th>
+          <th>EQUIPE</th>
+          <th>OBRA</th>
+          <th>TIPO</th>
+          <th>M2 / UNID</th>
+        </tr>
+      </thead>
+      <tbody id="ultimaExecBody"></tbody>
+    </table>
   </div>
 
 </main>
@@ -406,6 +416,7 @@ function normalizeTipo(t){if(!t)return '';var k=t.trim().toUpperCase();return TI
 // ── DATA ENGINE ─────────────────────────────────────────────────────────────
 var DATA={}, RENT={}, RENT_MEDIA={}, RENT_MEDIA_OBRA={}, ROSCA_FAT={}, ROSCA_KEYS=[], ROSCA_LABELS=[], ROSCA_COLORS=[], ROSCA_BORDERS=[], ROSCA_HOVER=[];
 var FAT_DIA_UTIL={}, DIAS_UTEIS={}, DIAS_OBRA={}, MONTHS=[], MONTH_LABELS={};
+var ULTIMA_EXEC={};
 var currentObra='TODAS', currentMes='ALL';
 
 var MES_NAMES={0:'JAN',1:'FEV',2:'MAR',3:'ABR',4:'MAI',5:'JUN',6:'JUL',7:'AGO',8:'SET',9:'OUT',10:'NOV',11:'DEZ'};
@@ -431,8 +442,9 @@ function processRawData(rows){
     var tipo=normalizeTipo(r['TIPO']||'');
     var equipe=r['EQUIPE']||'S/ EQUIPE';
     var m2=parseFloat(r['DIMENSÃO M2'])||0;
+    var qty=parseFloat(r['QUANTIDADE'])||0;
     var dateKey=dt.toISOString().slice(0,10);
-    parsed.push({obra:obra,dt:dt,mes:mes,yr:yr,fat:fat,custo:custo,res:res,tipo:tipo,equipe:equipe,m2:m2,dateKey:dateKey});
+    parsed.push({obra:obra,dt:dt,mes:mes,yr:yr,fat:fat,custo:custo,res:res,tipo:tipo,equipe:equipe,m2:m2,qty:qty,dateKey:dateKey});
   });
 
   // Discover unique values
@@ -634,6 +646,13 @@ function processRawData(rows){
       var du=DIAS_UTEIS[m]||1;
       FAT_DIA_UTIL[o][m]=parseFloat((fat/du).toFixed(2));
     });
+  });
+  // ULTIMA_EXEC: último registro por equipe (independente de filtros)
+  ULTIMA_EXEC={};
+  parsed.forEach(function(r){
+    if(!ULTIMA_EXEC[r.equipe]||r.dt>ULTIMA_EXEC[r.equipe].dt){
+      ULTIMA_EXEC[r.equipe]={dt:r.dt,obra:r.obra,tipo:r.tipo,m2:r.m2,qty:r.qty};
+    }
   });
 }
 
@@ -903,9 +922,26 @@ function updateMaterial(){
   currentMatMes='ALL';document.querySelectorAll('#matFilterBtns .kpi-btn').forEach(function(b){b.classList.toggle('kpi-btn-active',b.dataset.matmes==='ALL');});
   updateMatKpis('ALL');document.getElementById('selMatKgMes').value='ALL';document.getElementById('selBaldesMes').value='ALL';
   updateMatKgChart('ALL');updateEsferasChart();updateBaldesChart('ALL');
-  var m=DATA[currentObra].mat;var estoqueEl=document.getElementById('estoqueContent');var descEl=document.getElementById('estoqueDesc');
-  if(m.estoque){descEl.textContent='controle de estoque';var html='';m.estoque.forEach(function(e){var pct=(e.saldo/(e.entrada+0.001)*100).toFixed(0);html+='<div class="mat-estoque-item"><div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:5px;"><span style="font-family:Bebas Neue,sans-serif;font-size:16px;letter-spacing:1px;">'+e.mat+'</span><span style="font-family:IBM Plex Mono,monospace;font-size:11px;color:#2fcc71;font-weight:600;">'+e.saldo.toLocaleString('pt-BR')+' un</span></div><div style="display:flex;gap:16px;margin-bottom:6px;"><span style="font-family:IBM Plex Mono,monospace;font-size:10px;color:#aaa;">Entrada: '+e.entrada+'</span><span style="font-family:IBM Plex Mono,monospace;font-size:10px;color:#f55c5c;">Saida: '+e.saida+'</span></div><div class="bar-bg"><div class="bar-fill" style="width:'+pct+'%;background:#3da8f5"></div></div></div>';});estoqueEl.innerHTML=html;
-  } else {descEl.textContent='selecione uma obra com dados de estoque';estoqueEl.innerHTML='<div style="font-family:IBM Plex Mono,monospace;font-size:11px;color:#666;padding:20px 0;text-align:center;">Sem dados de estoque</div>';}
+}
+
+function updateUltimaExec(){
+  var tbody=document.getElementById('ultimaExecBody');if(!tbody)return;
+  var equipes=Object.keys(ULTIMA_EXEC).sort();
+  var html='';
+  equipes.forEach(function(eq){
+    var r=ULTIMA_EXEC[eq];
+    var dataFmt=r.dt.toLocaleDateString('pt-BR',{day:'2-digit',month:'2-digit',year:'numeric'});
+    var val=r.m2>0?r.m2.toLocaleString('pt-BR',{minimumFractionDigits:2,maximumFractionDigits:2})+' m²':(r.qty>0?r.qty.toLocaleString('pt-BR'):'—');
+    var cor=eBg(eq);
+    html+='<tr>';
+    html+='<td><span class="money" style="color:#aaa">'+dataFmt+'</span></td>';
+    html+='<td><div class="equipe-name" style="color:'+cor+'">'+eq+'</div></td>';
+    html+='<td><span style="font-family:IBM Plex Mono,monospace;font-size:12px;color:#b0b0b0;">'+r.obra+'</span></td>';
+    html+='<td><span style="font-family:IBM Plex Mono,monospace;font-size:12px;color:#f0f0f0;">'+r.tipo+'</span></td>';
+    html+='<td><span class="money" style="color:#F5C400">'+val+'</span></td>';
+    html+='</tr>';
+  });
+  tbody.innerHTML=html;
 }
 
 // ── GLOBAL SETTERS ────────────────────────────────────────────────────────────
@@ -970,6 +1006,7 @@ function fetchAndRender(){
       buildRentCheckboxes();
       document.getElementById('loadingOverlay').style.display='none';
       setObra('TODAS');
+      updateUltimaExec();
     })
     .catch(function(err){
       console.error('Erro ao carregar dados:',err);
