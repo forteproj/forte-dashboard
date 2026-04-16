@@ -681,7 +681,7 @@ function buildMonthButtons(){
     matContainer.appendChild(b);
   });
   // Dropdown options
-  ['selTipoMes','selEquipeMes','selResMes','selM2Mes','selRentMes','selMatKgMes','selBaldesMes','selGauge1Ref','selGauge2Ref'].forEach(function(id){
+  ['selEquipeMes','selResMes','selM2Mes','selRentMes','selMatKgMes','selBaldesMes','selGauge1Ref','selGauge2Ref'].forEach(function(id){
     var sel=document.getElementById(id);if(!sel)return;
     sel.innerHTML='';
     var isGauge=id.indexOf('Gauge')>=0;
@@ -782,7 +782,7 @@ function updateTipoChart(mes){
   tipoChart.data.datasets[0].backgroundColor=tipos.map(function(t){return tBg(t)+'cc';});
   tipoChart.data.datasets[0].borderColor=tipos.map(function(t){return tBg(t);});
   tipoChart.data.datasets[0].hoverBackgroundColor=tipos.map(function(t){return tHv(t);});
-  tipoChart.update();document.getElementById('selTipoMes').value=mes;
+  tipoChart.update();
 }
 
 function updateEquipeChart(mes){var eqs=DATA[currentObra].equipes;var edata=DATA[currentObra].equipeData[mes]||{};equipeChart.data.labels=eqs;equipeChart.data.datasets[0].data=eqs.map(function(e){return(edata[e]||{fat:0}).fat;});equipeChart.data.datasets[0].backgroundColor=eqs.map(function(){return CG+'bb';});equipeChart.data.datasets[0].borderColor=eqs.map(function(){return CG;});equipeChart.data.datasets[0].hoverBackgroundColor=eqs.map(function(){return CGh;});equipeChart.data.datasets[1].data=eqs.map(function(e){return(edata[e]||{custo:0}).custo;});equipeChart.data.datasets[1].backgroundColor=eqs.map(function(){return CR+'99';});equipeChart.data.datasets[1].borderColor=eqs.map(function(){return CR;});equipeChart.data.datasets[1].hoverBackgroundColor=eqs.map(function(){return CRh;});equipeChart.update();document.getElementById('selEquipeMes').value=mes;}
@@ -914,7 +914,7 @@ function setMes(mes){currentMes=mes;document.querySelectorAll('#kpiFilterBtns .k
 function setObra(obra){
   currentObra=obra;document.querySelectorAll('.obra-btn').forEach(function(b){b.classList.toggle('obra-btn-active',b.dataset.obra===obra);});
   document.querySelectorAll('#kpiFilterBtns .kpi-btn').forEach(function(b){b.classList.toggle('kpi-btn-active',b.dataset.mes==='ALL');});
-  ['selTipoMes','selEquipeMes','selResMes','selM2Mes','selRentMes'].forEach(function(id){document.getElementById(id).value='ALL';});
+  ['selEquipeMes','selResMes','selM2Mes','selRentMes'].forEach(function(id){document.getElementById(id).value='ALL';});
   document.getElementById('headerTitle').textContent=DATA[obra].title;document.getElementById('headerPeriod').textContent=DATA[obra].period;
   currentMes='ALL';updateMensal();updateKpi('ALL');updateRoscaChart('ALL');updateTipoChart('ALL');updateEquipeChart('ALL');updateResChart('ALL');updateM2Chart('ALL');updateRentChart('ALL');updateTable();updateMaterial();updateGauges();
   // Dias checkboxes
