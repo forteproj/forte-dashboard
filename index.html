@@ -652,14 +652,14 @@ function processRawData(rows){
   // Passo 1: encontrar a data mais recente de cada equipe
   parsed.forEach(function(r){
     if(!ULTIMA_EXEC[r.equipe]||r.dt>ULTIMA_EXEC[r.equipe].dt){
-      ULTIMA_EXEC[r.equipe]={dt:r.dt,dateKey:r.dateKey,porTipo:{}};
+      ULTIMA_EXEC[r.equipe]={dt:r.dt,dateKey:r.dateKey,obra:r.obra,porTipo:{}};
     }
   });
-  // Passo 2: somar m2/qty por tipo apenas na última data
+  // Passo 2: somar m2/qty por tipo apenas na última data, guardando obra
   parsed.forEach(function(r){
     var ue=ULTIMA_EXEC[r.equipe];
     if(!ue||r.dateKey!==ue.dateKey)return;
-    if(!ue.porTipo[r.tipo])ue.porTipo[r.tipo]={m2:0,qty:0};
+    if(!ue.porTipo[r.tipo])ue.porTipo[r.tipo]={m2:0,qty:0,obra:r.obra};
     ue.porTipo[r.tipo].m2+=r.m2;
     ue.porTipo[r.tipo].qty+=r.qty;
   });
@@ -944,12 +944,14 @@ function updateUltimaExec(){
     var tipos=Object.keys(r.porTipo).sort();
     tipos.forEach(function(tipo,idx){
       var val=r.porTipo[tipo];
-      var valFmt=val.m2>0?val.m2.toLocaleString('pt-BR',{minimumFractionDigits:2,maximumFractionDigits:2})+' m²':(val.qty>0?val.qty.toLocaleString('pt-BR'):'—');
+      var valFmt=val.m2>0?val.m2.toLocaleString('pt-BR',{minimumFractionDigits:2,maximumFractionDigits:2}):(val.qty>0?val.qty.toLocaleString('pt-BR'):'—');
+      var obra=val.obra||r.obra||'—';
       html+='<tr>';
       if(idx===0){
         html+='<td rowspan="'+tipos.length+'" style="vertical-align:top;padding-top:14px;"><span class="money" style="color:#aaa">'+dataFmt+'</span></td>';
         html+='<td rowspan="'+tipos.length+'" style="vertical-align:top;padding-top:14px;"><div class="equipe-name" style="color:'+cor+'">'+eq+'</div></td>';
       }
+      html+='<td><span style="font-family:IBM Plex Mono,monospace;font-size:12px;color:#b0b0b0;">'+obra+'</span></td>';
       html+='<td><span style="font-family:IBM Plex Mono,monospace;font-size:12px;color:#f0f0f0;">'+tipo+'</span></td>';
       html+='<td><span class="money" style="color:#F5C400">'+valFmt+'</span></td>';
       html+='</tr>';
