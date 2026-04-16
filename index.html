@@ -840,17 +840,27 @@ function getCheckedRentObras(){
 function updateRentChart(mes){
   var labels,datasets,mediaVal;
   var checkedObras=getCheckedRentObras();
+
+  function calcMedia(obras,m){
+    var sum=0,cnt=0;
+    obras.forEach(function(o){var v=RENT[o]?RENT[o][m]||0:0;if(v>0){sum+=v;cnt++;}});
+    return cnt>0?parseFloat((sum/cnt).toFixed(1)):0;
+  }
+
   if(currentObra==='TODAS'){
     if(mes==='ALL'){
-      labels=MONTHS.slice();mediaVal=RENT_MEDIA.ALL;
+      labels=MONTHS.slice();
+      mediaVal=calcMedia(checkedObras,'ALL');
       datasets=checkedObras.map(function(o){return{type:'bar',label:o,data:MONTHS.map(function(m){return RENT[o]?RENT[o][m]||0:0;}),backgroundColor:obraColor(o)+'bb',borderColor:obraColor(o),hoverBackgroundColor:obraColor(o,2),borderWidth:2,borderRadius:0,order:1};});
       datasets.push(makeMediaLine(mediaVal,labels));
     } else {
-      labels=checkedObras.slice();mediaVal=RENT_MEDIA[mes]||0;
+      labels=checkedObras.slice();
+      mediaVal=calcMedia(checkedObras,mes);
       datasets=[{type:'bar',label:'Margem %',data:labels.map(function(o){return RENT[o]?RENT[o][mes]||0:0;}),backgroundColor:labels.map(function(o){return obraColor(o)+'bb';}),borderColor:labels.map(function(o){return obraColor(o);}),hoverBackgroundColor:labels.map(function(o){return obraColor(o,2);}),borderWidth:2,borderRadius:0,order:1},makeMediaLine(mediaVal,labels)];
     }
   } else {
-    labels=MONTHS.slice();mediaVal=RENT_MEDIA_OBRA[currentObra]?RENT_MEDIA_OBRA[currentObra].ALL||0:0;
+    labels=MONTHS.slice();
+    mediaVal=RENT_MEDIA_OBRA[currentObra]?RENT_MEDIA_OBRA[currentObra].ALL||0:0;
     datasets=[{type:'bar',label:currentObra,data:MONTHS.map(function(m){return RENT[currentObra]?RENT[currentObra][m]||0:0;}),backgroundColor:obraColor(currentObra)+'bb',borderColor:obraColor(currentObra),hoverBackgroundColor:obraColor(currentObra,2),borderWidth:2,borderRadius:0,order:1},makeMediaLine(mediaVal,labels)];
   }
   var maxRent=0;datasets.forEach(function(ds){if(ds.data)ds.data.forEach(function(v){if(v>maxRent)maxRent=v;});});
